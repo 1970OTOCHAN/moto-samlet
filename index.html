@@ -81,7 +81,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 <body>
 
 <div class="app" id="app">
-  <div class="top"><span><b>Moto Meter Samlet™</b>　Ver 1.0</span><span id="wake">画面ON：確認中</span></div>
+  <div class="top"><span><b>Moto Meter Samlet™</b>　Ver 1.1</span><span id="wake">画面ON：確認中</span></div>
 
   <div class="cell" id="clk">
     <div class="lb"><span id="date">----/--/--(-)</span><span>時刻</span></div>
@@ -108,7 +108,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 
 <div class="op" id="op" role="dialog" aria-label="ご利用の前に">
   <h1>Moto Meter Samlet™</h1>
-  <div class="y">モトメーター サムレット　Ver 1.0</div>
+  <div class="y">モトメーター サムレット　Ver 1.1</div>
 
   <div class="warn">
     <h2>必ずお読みください</h2>
@@ -131,10 +131,6 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
     </ol>
   </div>
 
-  <button class="go" id="go" type="button">同意してスタート</button>
-  <div class="agree">「同意してスタート」を押すと、上記と下記の内容に同意したものとします。</div>
-  <div class="err" id="err"></div>
-
   <div class="legal">
     <p>本アプリは無料で提供しており、表示の正確さ・動作を保証するものではありません。</p>
     <p>本アプリの使用または使用できなかったことにより生じた事故・損害・トラブル等について、作者は一切の責任を負いません。</p>
@@ -143,6 +139,10 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
     <p>標高データ：出典 国土地理院（標高API）</p>
     <p class="cr">© 2026 1970 OTOCHAN</p>
   </div>
+
+  <div class="agree">「同意してスタート」を押すと、上記の内容に同意したものとします。</div>
+  <button class="go" id="go" type="button">同意してスタート</button>
+  <div class="err" id="err"></div>
 </div>
 
 <script>

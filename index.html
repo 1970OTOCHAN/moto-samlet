@@ -81,7 +81,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 <body>
 
 <div class="app" id="app">
-  <div class="top"><span><b>Moto Meter Samlet™</b>　Ver 1.1</span><span id="wake">画面ON：確認中</span></div>
+  <div class="top"><span><b>Moto Meter Samlet™</b>　Ver 1.2</span><span id="wake">画面ON：確認中</span></div>
 
   <div class="cell" id="clk">
     <div class="lb"><span id="date">----/--/--(-)</span><span>時刻</span></div>
@@ -108,7 +108,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 
 <div class="op" id="op" role="dialog" aria-label="ご利用の前に">
   <h1>Moto Meter Samlet™</h1>
-  <div class="y">モトメーター サムレット　Ver 1.1</div>
+  <div class="y">モトメーター サムレット　Ver 1.2</div>
 
   <div class="warn">
     <h2>必ずお読みください</h2>
@@ -196,6 +196,12 @@ function startGeo(){
 
 /* ---------- 勾配：スマホの傾きセンサー（勾配メーターと同じ計算） ---------- */
 let fu=null,fz=null,last=0,curO=null,zero=null,cal=null,gotMotion=false;
+/* 数字のちらつきを抑える仕組み（Ver 1.2）
+   ①なめらかにする時間 1.5秒
+   ②加速・ブレーキ中（前後の強い揺れ）は計算を止め、直前の数字を出したままにする
+   ③表示の数字は、今の表示との違いが約2%以上で1秒、約1%で3秒続いたときだけ切り替える */
+const SMOOTH=1.5,SHAKE_ON=1.2;
+let sx=0,sy=0,sz=0,shakeUntil=0,freezeFrom=0,frozen=false,shown=null,pendT=0,hist=[];
 let rev=store.get("samlet_rev")==="1";
 function orient(){
   const a=(screen.orientation&&screen.orientation.angle!=null)?screen.orientation.angle:(window.orientation||0);
@@ -204,7 +210,7 @@ function orient(){
 function loadZero(){
   const o=orient();if(o===curO)return;curO=o;
   const z=parseFloat(store.get("samlet_zero_"+o));zero=isNaN(z)?null:z;
-  fu=null;fz=null;
+  fu=null;fz=null;shown=null;hist=[];
   $("msg").textContent=zero===null?"この向きの「水平リセット」を押してください":"この向きの水平設定を使っています";
 }
 function onMotion(e){
@@ -213,18 +219,45 @@ function onMotion(e){
   const u=o===90?g.x:o===270?-g.x:o===180?-g.y:g.y;
   const z=g.z;
   const now=performance.now(),dt=last?Math.min((now-last)/1000,0.2):0.02;last=now;
-  const k=1-Math.exp(-dt/0.6);
-  if(fu===null){fu=u;fz=z}else{fu+=k*(u-fu);fz+=k*(z-fz)}
   if(cal){cal.u+=u;cal.z+=z;cal.n++}
+  /* 加速・ブレーキの検出：重力を除いた揺れを0.15秒でならす（細かい振動は打ち消し合う） */
+  const la=e.acceleration,ks=1-Math.exp(-dt/0.15);
+  if(la&&la.x!=null){sx+=ks*(la.x-sx);sy+=ks*(la.y-sy);sz+=ks*(la.z-sz)}
+  else{sx+=ks*(g.x-sx);sy+=ks*(g.y-sy);sz+=ks*(g.z-sz)}
+  const mag=(la&&la.x!=null)?Math.hypot(sx,sy,sz):Math.abs(Math.hypot(sx,sy,sz)-9.81);
+  if(mag>SHAKE_ON)shakeUntil=now+800;
+  const was=frozen;
+  frozen=fu!==null&&now<shakeUntil;
+  if(frozen){if(!freezeFrom)freezeFrom=now;if(now-freezeFrom>5000)frozen=false}else freezeFrom=0;
+  if(frozen){
+    /* 止めた瞬間に、揺れが始まる少し前（0.6秒前）の値へ戻す */
+    if(!was){const old=hist.find(s=>s.t>=now-600);if(old){fu=old.fu;fz=old.fz}}
+    return;
+  }
+  const k=1-Math.exp(-dt/SMOOTH);
+  if(fu===null){fu=u;fz=z}else{fu+=k*(u-fu);fz+=k*(z-fz)}
+  hist.push({t:now,fu,fz});while(hist.length&&hist[0].t<now-1200)hist.shift();
 }
 function wrap(a){while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;return a}
+let pSum=0,pN=0;
+function settle(p){
+  const now=performance.now();
+  if(shown===null){shown=Math.round(p);pendT=0;return shown}
+  if(Math.abs(p-shown)<0.8){pendT=0;pSum=0;pN=0;return shown}
+  if(!pendT){pendT=now;pSum=0;pN=0}
+  pSum+=p;pN++;
+  const avg=pSum/pN,diff=Math.abs(avg-shown);
+  if(now-pendT>=(diff>=1.8?1000:3000)&&Math.round(avg)!==shown){shown=Math.round(avg);pendT=0;pSum=0;pN=0}
+  return shown;
+}
 function setC(c){document.documentElement.style.setProperty("--c",c)}
 function drawGrade(){
   if(fu===null){$("grdSt").textContent=gotMotion?"計測中":"センサー待ち…";return}
-  $("grdSt").textContent="計測中";
+  $("grdSt").textContent=frozen?"加速・減速中は停止":"計測中";
   if(zero===null){$("grdLab").textContent="未設定";$("grdM").textContent="";$("grdV").textContent="--";setC("#fff");return}
   let a=-wrap(Math.atan2(fz,fu)-zero);if(rev)a=-a;
-  const r=Math.round(Math.tan(a)*100);
+  const p=Math.tan(a)*100,r=frozen?(shown===null?Math.round(p):shown):settle(p);
+  if(frozen)pendT=0;
   let lab="平坦",c="#fff",mark="";
   if(r>=1){lab="上り";c="var(--up)";mark="▲"}else if(r<=-1){lab="下り";c="var(--down)";mark="▼"}
   setC(c);$("grdLab").textContent=lab;
@@ -238,13 +271,13 @@ function doZero(){
   setTimeout(()=>{
     const c=cal;cal=null;$("zero").disabled=false;
     if(!c||c.n<5){$("msg").textContent="うまく測れませんでした。もう一度押してください";return}
-    zero=Math.atan2(c.z/c.n,c.u/c.n);
+    zero=Math.atan2(c.z/c.n,c.u/c.n);shown=null;
     store.set("samlet_zero_"+curO,String(zero));
     $("msg").textContent="水平を設定しました（0%）";
   },1500);
 }
 $("zero").addEventListener("click",doZero);
-$("rev").addEventListener("click",()=>{rev=!rev;store.set("samlet_rev",rev?"1":"0");$("msg").textContent=rev?"上り・下りを反転しました":"上り・下りを元に戻しました"});
+$("rev").addEventListener("click",()=>{rev=!rev;shown=null;store.set("samlet_rev",rev?"1":"0");$("msg").textContent=rev?"上り・下りを反転しました":"上り・下りを元に戻しました"});
 setInterval(drawGrade,150);
 
 /* ---------- 画面ON維持 ---------- */

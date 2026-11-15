@@ -19,6 +19,7 @@
 - 画面ON維持（Wake Lock）
 - 開くたびに最新版を確かめる：sw.js は fetch(e.request.url,{cache:'no-cache'})、登録は updateViaCache:'none'、新しい sw.js に切り替わったら1回だけ自動で読み込み直す
 - 新しい版への自動の読み込み直し（Ver 1.4）：計測中（「同意してスタート」を押したあと）は読み込み直さない。オープニング中は、読んでいた位置（スクロール位置）を sessionStorage に覚えてから読み込み直し、同じ位置に戻す（いちばん上に戻ってしまう不具合の修正）
+- manifest.webmanifest に名札（"id": "/moto-samlet/app"）を入れてある（Ver 1.6）。Chromeに「インストール済み」の古い記録だけが残ってインストールできなくなった不具合への対策。名札は変えない（変えると別のアプリ扱いになる）
 - 同じサイト（1970otochan.github.io）のほかのアプリと混ざらないよう、保存する設定の名前は samlet_、保存箱の名前は moto-samlet- で始める
 
 ## 作業のルール

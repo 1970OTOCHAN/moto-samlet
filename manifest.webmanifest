@@ -1,4 +1,5 @@
 {
+  "id": "/moto-samlet/app",
   "name": "Moto Meter Samlet",
   "short_name": "Samlet",
   "start_url": "./",

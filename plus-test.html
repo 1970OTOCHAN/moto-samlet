@@ -58,6 +58,8 @@ button{font-family:inherit;cursor:pointer}
 #m-speed{--fw:56cqw}#m-speed .num{color:var(--g)}
 #m-grade{--fw:29cqw}
 #m-alt{--fw:33cqw}#m-alt .num{color:var(--alt)}
+.sub.msg{white-space:normal;text-align:center;font-size:clamp(12px,8cqh,17px);line-height:1.35;padding:0 8px}
+#m-grade.need{outline:3px dashed var(--up);outline-offset:-6px;border-radius:12px;cursor:pointer}
 .foot{grid-area:foot;text-align:center;font-size:10px;color:#9A9A9A;padding-top:3px;white-space:nowrap}
 @media (orientation:landscape){
  #app{grid-template-columns:57% minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"map top" "map row2" "map metrics" "map foot";column-gap:14px}
@@ -127,7 +129,7 @@ button{font-family:inherit;cursor:pointer}
   <div class="slot" id="slotB"></div>
   <div class="slot" id="slotC"></div>
  </div>
- <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.3　© 2026 1970 OTOCHAN</div>
+ <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.4　© 2026 1970 OTOCHAN</div>
 </div>
 
 <div id="pool" hidden>
@@ -138,13 +140,13 @@ button{font-family:inherit;cursor:pointer}
 
 <div class="layer on" id="opening"><div class="box">
  <h1>Moto Meter Samlet™ Plus</h1>
- <div class="ver">試作版 Ver 0.3（テスト用）</div>
+ <div class="ver">試作版 Ver 0.4（テスト用）</div>
  <div class="note"><b>はじめにお読みください</b><br>
  このアプリは、時計・方位・地図・速度・勾配・標高を1画面に表示するバイク用メーターです。スマホの位置情報（GPS）と傾き・方位のセンサーを使います。地図（国土地理院最適化ベクトルタイル）と標高は国土地理院のデータを使います。</div>
  <div class="note"><b>安全のために</b><br>
  走行中は本アプリの操作・注視をしないでください。設定や並べ替えは、安全な場所に止まってから行ってください。スマホはホルダーにしっかり固定してください。</div>
  <div class="note"><b>勾配について</b><br>
- 平らな場所にバイクを止め、メニューの「勾配の水平リセット」を押してからお使いください。加速・減速やエンジンの振動で表示がゆれることがあります。</div>
+ 平らな場所にバイクを止め、勾配の枠（オレンジの点線）を押して「水平リセット」をしてからお使いください。2回目からはメニュー（≡）の「勾配の水平リセット」でもできます。加速・減速やエンジンの振動で表示がゆれることがあります。</div>
  <div class="note"><b>免責事項</b><br>
  本アプリは無料で提供しており、表示の正確さ・動作を保証するものではありません。本アプリの使用または使用できなかったことにより生じた事故・損害・トラブル等について、作者は一切の責任を負いません。走行中は本アプリの操作・注視をせず、交通ルールを守って安全運転でご利用ください。</div>
  <div class="note"><b>利用条件</b><br>
@@ -296,9 +298,12 @@ function settle(p){
  return shown;
 }
 function drawGrade(){
- const vg=$('vGrade'),gd=$('gDir');
+ const vg=$('vGrade'),gd=$('gDir'),cell=$('m-grade');
+ cell.classList.toggle('need',zero===null&&!cal);
+ if(zState){vg.textContent='';gd.textContent=zState.t;gd.style.color=zState.c;gd.classList.add('msg');return}
+ gd.classList.remove('msg');
  if(fu===null){vg.textContent='--';vg.style.color='#fff';gd.textContent=gotMotion?'計測中':'センサー待ち';gd.style.color='var(--sub)';return}
- if(zero===null){vg.textContent='--';vg.style.color='#fff';gd.textContent='水平リセット前';gd.style.color='var(--sub)';return}
+ if(zero===null){vg.textContent='--';vg.style.color='#fff';gd.textContent='平らな場所で止まって、ここを押してください（水平リセット）';gd.style.color='var(--up)';gd.classList.add('msg');return}
  let a=-wrap(Math.atan2(fz,fu)-zero);if(flip)a=-a;
  const p=Math.tan(a)*100,r=frozen?(shown===null?Math.round(p):shown):settle(p);
  if(frozen)pendT=0;
@@ -308,17 +313,22 @@ function drawGrade(){
  vg.style.color=c;gd.textContent=frozen?'加速・減速中は停止':lab;gd.style.color=frozen?'var(--sub)':c;
 }
 const RTXT='勾配の水平リセット';
+let zState=null,zTimer=0;
 function rStat(t,c){const e=$('mStat');e.textContent=t;e.style.color=c||'#B0B0B0'}
+function zMsg(t,c,ms){zState={t,c};clearTimeout(zTimer);if(ms)zTimer=setTimeout(()=>{zState=null},ms)}
 function doZero(){
  const btn=$('mReset');
- if(fu===null){rStat(gotMotion?'センサーの値を準備しています。数秒待ってからもう一度押してください。':'傾きセンサーの値が届いていません。「同意してスタート」を押したか確かめ、ページを開き直してください。','#FF6B5B');return}
- loadZero();cal={u:0,z:0,n:0};btn.disabled=true;btn.textContent='測っています…（スマホに触らないでください）';rStat('');
+ if(moving()){const m='走行中は使えません。止まってから押してください。';rStat(m,'#FF6B5B');zMsg(m,'#FF6B5B',3000);return}
+ if(fu===null){const m=gotMotion?'センサーの準備中です。数秒待ってからもう一度押してください。':'傾きセンサーの値が届いていません。ページを開き直してください。';rStat(m,'#FF6B5B');zMsg(m,'#FF6B5B',4000);return}
+ if(cal)return;
+ loadZero();cal={u:0,z:0,n:0};btn.disabled=true;btn.textContent='測っています…（スマホに触らないでください）';rStat('');zMsg('測っています…触らないでください','#fff');
  setTimeout(()=>{const c=cal;cal=null;btn.disabled=false;
-  if(!c||c.n<5){btn.textContent=RTXT;rStat('うまく測れませんでした。もう一度押してください。','#FF6B5B');return}
+  if(!c||c.n<5){btn.textContent=RTXT;const m='うまく測れませんでした。もう一度押してください。';rStat(m,'#FF6B5B');zMsg(m,'#FF6B5B',3000);return}
   zero=Math.atan2(c.z/c.n,c.u/c.n);shown=null;LS.set('samletplus_zero_'+curO,zero);
-  btn.textContent='設定しました ✓（0%）';rStat('この画面の向きの水平を記憶しました。','#4ADE80');
+  btn.textContent='設定しました ✓（0%）';rStat('この画面の向きの水平を記憶しました。','#4ADE80');zMsg('設定しました ✓','#4ADE80',1500);
   setTimeout(()=>{btn.textContent=RTXT},2500)},1500);
 }
+$('m-grade').onclick=()=>{if(zero===null||zState)doZero()};
 
 /* 表示の更新 */
 function render(){
@@ -347,7 +357,6 @@ $('agree').onclick=async()=>{
  if(navigator.geolocation)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
  else onErr({code:2});
  keepOn();
- loadZero();if(zero===null)setTimeout(()=>toast('平らな場所で、メニューの「勾配の水平リセット」を押してください'),1200);
 };
 
 /* メニュー */

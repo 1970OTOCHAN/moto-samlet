@@ -8,9 +8,6 @@
 <meta http-equiv="Expires" content="0">
 <meta name="theme-color" content="#000000">
 <title>Moto Meter Samlet™ Plus 試作版</title>
-<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-<script src="https://unpkg.com/pmtiles@3.2.1/dist/pmtiles.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -19,43 +16,32 @@
 html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Noto Sans JP',sans-serif;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
 button{font-family:inherit;cursor:pointer}
 #app{height:100dvh;display:grid;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
- grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) 34% auto;grid-template-areas:"top" "row2" "map" "metrics" "foot"}
+ grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top" "clock" "hd" "metrics" "foot"}
 .top{grid-area:top;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
 #date{font-size:18px;font-weight:700;white-space:nowrap}
 .tr{display:flex;align-items:center;gap:10px}
 #gps{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#888;white-space:nowrap}
 #menuBtn{width:44px;height:40px;border-radius:10px;border:1px solid #444;background:#1A1A1A;color:#fff;font-size:20px;line-height:1}
-.row2{grid-area:row2;display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.crow{grid-area:clock;display:flex;justify-content:center;align-items:baseline;padding:6px 0 4px;border-bottom:1px solid var(--line)}
 .clock{font-family:var(--num);font-weight:600;line-height:1;white-space:nowrap}
-#hm{font-size:clamp(44px,15vw,68px)}#ss{font-size:clamp(24px,7.5vw,34px);color:var(--sub);margin-left:3px}
-.hd{display:flex;flex-direction:column;align-items:flex-end}
-.hd small{font-size:12px;color:var(--sub);font-weight:700}
+#hm{font-size:clamp(60px,24vw,104px)}#ss{font-size:clamp(30px,12vw,52px);color:var(--sub);margin-left:5px}
+.hdrow{grid-area:hd;padding:6px 0 4px;border-bottom:1px solid var(--line)}
+.hdline{display:flex;justify-content:space-between;align-items:baseline}
+.hdline small{font-size:13px;color:var(--sub);font-weight:700}
 #hdTxt{font-size:clamp(20px,6.5vw,28px);font-weight:700;line-height:1.1;white-space:nowrap}
 #hdDeg{font-family:var(--num);color:var(--sub)}
-.map{grid-area:map;position:relative;overflow:hidden;border-radius:14px;background:#DCD9D2;margin:8px 0}
-#mlmap{position:absolute;inset:0}
-#me{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;pointer-events:none}
-#me .halo{position:absolute;inset:-14px;border-radius:50%;background:rgba(59,130,246,.2)}
-#meArrow{position:absolute;inset:0;transition:transform .2s linear}
-.ov{position:absolute;background:rgba(0,0,0,.75);color:#fff;border-radius:10px}
-#north{top:10px;right:10px;width:44px;height:44px;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700}
-.zoom{position:absolute;right:10px;top:64px;display:flex;flex-direction:column;gap:8px}
-.zoom button{width:48px;height:48px;border-radius:10px;border:none;background:rgba(0,0,0,.75);color:#fff;font-size:26px;font-weight:700}
-#scale{left:10px;bottom:10px;padding:3px 8px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
-#scaleBar{height:7px;border:2px solid #fff;border-top:none}
-#attr{position:absolute;right:6px;bottom:6px;left:auto;max-width:60%;font-size:9px;line-height:1.3;color:#333;background:rgba(255,255,255,.85);padding:1px 5px;border-radius:4px;text-decoration:none;text-align:right}
-#search{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:#1A1A1A;color:#ccc;font-size:15px;line-height:1.6}
-.metrics{grid-area:metrics;display:grid;grid-template-columns:0.9fr 1.1fr;grid-template-rows:1fr 1fr;grid-template-areas:"a b" "a c";border-top:1px solid var(--line)}
+#tape{display:block;width:100%;height:44px;margin-top:2px}
+.metrics{grid-area:metrics;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1.45fr 1fr;grid-template-areas:"a a" "b c"}
 .slot{position:relative;container-type:size;overflow:hidden}
-#slotA{grid-area:a;border-right:1px solid var(--line)}
-#slotB{grid-area:b;border-bottom:1px solid var(--line)}
+#slotA{grid-area:a;border-bottom:1px solid var(--line)}
+#slotB{grid-area:b;border-right:1px solid var(--line)}
 #slotC{grid-area:c}
 .m{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:16px}
 .lab{position:absolute;top:6px;left:10px;font-size:13px;color:var(--sub);font-weight:700}
 .num{font-family:var(--num);font-weight:700;line-height:.9;white-space:nowrap;font-size:min(56cqh,var(--fw))}
 .u{font-size:.42em;margin-left:.06em}
 .sub{font-size:clamp(12px,9cqh,22px);font-weight:700;white-space:nowrap;margin-top:2px}
-#m-speed{--fw:56cqw}#m-speed .num{color:var(--g)}
+#m-speed{--fw:44cqw}#m-speed .num{color:var(--g)}
 #m-grade{--fw:29cqw}
 #m-alt{--fw:33cqw}#m-alt .num{color:var(--alt)}
 .sub.msg{white-space:normal;text-align:center;font-size:clamp(12px,8cqh,17px);line-height:1.35;padding:0 8px}
@@ -63,15 +49,12 @@ button{font-family:inherit;cursor:pointer}
 #m-grade.need{outline:3px dashed var(--up);outline-offset:-6px;border-radius:12px}
 .foot{grid-area:foot;text-align:center;font-size:10px;color:#9A9A9A;padding-top:3px;white-space:nowrap}
 @media (orientation:landscape){
- #app{grid-template-columns:57% minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"map top" "map row2" "map metrics" "map foot";column-gap:14px}
- .map{margin:0}
+ #app{grid-template-columns:40% minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top metrics" "clock metrics" "hd metrics" ". metrics" "foot metrics";column-gap:16px}
  #date{font-size:15px}
- #hm{font-size:clamp(36px,7vh + 2vw,60px)}#ss{font-size:clamp(20px,4vh + 1vw,30px)}
+ #hm{font-size:clamp(44px,14vh + 2vw,88px)}#ss{font-size:clamp(22px,7vh + 1vw,44px)}
  #hdTxt{font-size:clamp(18px,5vh,26px)}
- .metrics{grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr;grid-template-areas:"a a" "b c"}
- #slotA{border-right:none;border-bottom:1px solid var(--line)}
- #slotB{border-bottom:none;border-right:1px solid var(--line)}
- .foot{text-align:right}
+ .metrics{border-left:1px solid var(--line);padding-left:12px}
+ .foot{text-align:left}
 }
 /* 重ねて表示する画面 */
 .layer{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:20;display:none;overflow:auto;padding:max(18px,env(safe-area-inset-top)) 18px max(18px,env(safe-area-inset-bottom))}
@@ -86,12 +69,12 @@ button{font-family:inherit;cursor:pointer}
 .note{background:#151515;border:1px solid #333;border-radius:12px;padding:14px;margin:12px 0;font-size:15px;line-height:1.75}
 .note b{color:var(--up)}
 .warnTxt{color:var(--up);font-size:12px;font-weight:700}
-.mini{display:grid;grid-template-columns:.9fr 1.1fr;grid-template-rows:1fr 1fr;gap:6px;height:180px;margin:12px 0}
+.mini{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr;gap:6px;height:180px;margin:12px 0}
 .mini button{border-radius:10px;border:2px dashed #555;background:#111;color:#fff;font-size:18px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
 .mini button small{font-size:11px;color:#9A9A9A}
 .mini button.sel{border:3px solid var(--g);background:#0E2416}
 .mini button.sel small{color:var(--g)}
-#sA{grid-row:span 2}
+#sA{grid-column:span 2}
 .fixed{height:44px;border-radius:10px;background:#1A1A1A;display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:#8A8A8A;font-size:13px;font-weight:700;margin-top:6px}
 .choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .choices button{height:52px;border-radius:10px;border:1px solid #444;background:#262626;color:#fff;font-size:16px;font-weight:700}
@@ -110,27 +93,17 @@ button{font-family:inherit;cursor:pointer}
    <button id="menuBtn" aria-label="メニュー">≡</button>
   </div>
  </div>
- <div class="row2">
-  <div class="clock"><span id="hm">--:--</span><span id="ss">:--</span></div>
-  <div class="hd"><small>方位</small><span id="hdTxt">-- <span id="hdDeg"></span></span></div>
- </div>
- <div class="map" id="map">
-  <div id="mlmap"></div>
-  <div id="me"><div class="halo"></div>
-   <svg id="meArrow" viewBox="0 0 46 46" aria-hidden="true"><path d="M23 4 L37 38 L23 31 L9 38 Z" fill="#1D4ED8" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>
-  </div>
-  <div id="north" class="ov"><svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true"><path d="M7 0 L14 12 H0 Z" fill="#FF6B5B"/></svg>北</div>
-  <div class="zoom"><button id="zin" aria-label="拡大">＋</button><button id="zout" aria-label="縮小">－</button></div>
-  <div id="scale" class="ov"><span id="scaleBar" style="width:60px"></span><span id="scaleTxt"></span></div>
-  <a id="attr" href="https://github.com/gsi-cyberjapan/optimal_bvmap" target="_blank" rel="noopener">出典：国土地理院最適化ベクトルタイル（一部を加工して表示）</a>
-  <div id="search">現在地を探しています…<br>空が見える場所でお待ちください。</div>
+ <div class="crow"><div class="clock"><span id="hm">--:--</span><span id="ss">:--</span></div></div>
+ <div class="hdrow">
+  <div class="hdline"><small>方位</small><span id="hdTxt">-- <span id="hdDeg"></span></span></div>
+  <svg id="tape" aria-hidden="true"></svg>
  </div>
  <div class="metrics">
   <div class="slot" id="slotA"></div>
   <div class="slot" id="slotB"></div>
   <div class="slot" id="slotC"></div>
  </div>
- <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.6　© 2026 1970 OTOCHAN</div>
+ <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.7　© 2026 1970 OTOCHAN</div>
 </div>
 
 <div id="pool" hidden>
@@ -141,9 +114,9 @@ button{font-family:inherit;cursor:pointer}
 
 <div class="layer on" id="opening"><div class="box">
  <h1>Moto Meter Samlet™ Plus</h1>
- <div class="ver">試作版 Ver 0.6（テスト用）</div>
+ <div class="ver">試作版 Ver 0.7（テスト用）</div>
  <div class="note"><b>はじめにお読みください</b><br>
- このアプリは、時計・方位・地図・速度・勾配・標高を1画面に表示するバイク用メーターです。スマホの位置情報（GPS）と傾き・方位のセンサーを使います。地図（国土地理院最適化ベクトルタイル）と標高は国土地理院のデータを使います。</div>
+ このアプリは、日付・時計・方位・速度・勾配・標高を1画面に表示するバイク用メーターです。スマホの位置情報（GPS）と傾きセンサーを使います。方位は走っているときの進む向きから求め、止まっている間は最後の向きを表示します。標高は国土地理院のデータを使います。</div>
  <div class="note"><b>安全のために</b><br>
  走行中は本アプリの操作・注視をしないでください。設定や並べ替えは、安全な場所に止まってから行ってください。スマホはホルダーにしっかり固定してください。</div>
  <div class="note"><b>勾配について</b><br>
@@ -168,7 +141,7 @@ button{font-family:inherit;cursor:pointer}
  <h2>並べ替え</h2>
  <div class="warnTxt">止まっているときだけ使えます</div>
  <p style="font-size:14px;color:#B0B0B0;line-height:1.6;margin:8px 0">変えたい枠をタップして、入れる表示を選んでください。並びは縦向き・横向きで共通です。</p>
- <div class="fixed"><span>日付・時計・方位・地図</span><span>固定</span></div>
+ <div class="fixed"><span>日付・時計・方位</span><span>固定</span></div>
  <div class="mini"><button id="sA"></button><button id="sB"></button><button id="sC"></button></div>
  <div style="font-size:13px;color:#B0B0B0;font-weight:700;margin:6px 0 8px" id="sTitle"></div>
  <div class="choices"><button data-k="speed">速度</button><button data-k="grade">勾配</button><button data-k="alt">標高</button></div>
@@ -189,7 +162,7 @@ const DIRS=['北','北東','東','南東','南','南西','西','北西'];
 const R=Math.PI/180;
 
 let pos=null,speedKmh=null,rawKmh=null,gpsHeading=null,compass=null,lastHd=null,alt=null,altBusy=false,altLast=null;
-let zoom=LS.get('samletplus_zoom',15),trail=[],started=false;
+let started=false;
 let order=LS.get('samletplus_order',['speed','grade','alt']);
 if(!Array.isArray(order)||order.length!==3||!['speed','grade','alt'].every(k=>order.includes(k)))order=['speed','grade','alt'];
 let flip=LS.get('samletplus_flip',false);
@@ -204,32 +177,23 @@ setInterval(tick,250);tick();
 function place(){['slotA','slotB','slotC'].forEach((s,i)=>$(s).appendChild($('m-'+order[i])))}
 place();
 
-/* 地図（Route Animator Enkel・城マップと同じ国土地理院の最適化ベクトルタイル。境界線・等高線は消す）
-   北が上・現在地が真ん中で固定。指では動かせず、＋／－で縮尺だけ変える */
-const map=$('map');
 function dist(a,b){const dl=(b.lat-a.lat)*R,dn=(b.lon-a.lon)*R,h=Math.sin(dl/2)**2+Math.cos(a.lat*R)*Math.cos(b.lat*R)*Math.sin(dn/2)**2;return 12742000*Math.asin(Math.sqrt(h))}
-let ml=null,mlReady=false;
-try{
- maplibregl.addProtocol('pmtiles',new pmtiles.Protocol().tile);
- ml=new maplibregl.Map({container:'mlmap',style:'https://gsi-cyberjapan.github.io/optimal_bvmap/style/std.json',center:[135.5,34.7],zoom:zoom,maxZoom:17.5,minZoom:5,interactive:false,attributionControl:false,bearing:0,pitch:0});
- ml.on('load',()=>{
-  ml.getStyle().layers.forEach(l=>{if(['AdmBdry','Cntr'].includes(l['source-layer']))ml.setLayoutProperty(l.id,'visibility','none')});
-  ml.addSource('trail',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
-  ml.addLayer({id:'trail',type:'line',source:'trail',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#16A34A','line-width':5,'line-opacity':.85}});
-  mlReady=true;drawMap();
- });
-}catch(e){$('search').style.display='flex';$('search').textContent='地図を読み込めませんでした。電波のよい場所で開き直してください。'}
-function drawMap(){
- if(!pos||!ml)return;
- ml.jumpTo({center:[pos.lon,pos.lat],zoom:zoom,bearing:0});
- if(mlReady){const c=trail.map(p=>[p[1],p[0]]);c.push([pos.lon,pos.lat]);ml.getSource('trail').setData({type:'Feature',geometry:{type:'LineString',coordinates:c}})}
- const mpp=40075016.686*Math.cos(pos.lat*R)/(512*2**zoom),want=mpp*90;
- let nice=10;for(const s of [10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000])if(s<=want)nice=s;
- $('scaleBar').style.width=Math.round(nice/mpp)+'px';$('scaleTxt').textContent=nice>=1000?(nice/1000)+'km':nice+'m';
+
+/* 方位テープ（進む向きを真ん中に、左右70度ぶん） */
+const tape=$('tape');let tapeHd=null,tapeW=0;
+function drawTape(hd){
+ const w=tape.clientWidth||300;if(hd===tapeHd&&w===tapeW)return;tapeHd=hd;tapeW=w;
+ const c=w/2,ppd=w/140;let h='<path d="M'+(c-7)+' 0 L'+(c+7)+' 0 L'+c+' 10 Z" fill="#4ADE80"/>';
+ if(hd!=null){
+  for(let d=Math.ceil((hd-70)/15)*15;d<=hd+70;d+=15){
+   const x=(c+(d-hd)*ppd).toFixed(1),dd=((d%360)+360)%360,main=dd%45===0;
+   h+='<path d="M'+x+' '+(main?12:14)+' V'+(main?26:22)+'" stroke="'+(main?'#fff':'#666')+'" stroke-width="'+(main?3:2)+'"/>';
+   if(main)h+='<text x="'+x+'" y="42" fill="'+(dd===0?'#FF6B5B':'#fff')+'" font-size="15" font-weight="700" text-anchor="middle" font-family="Noto Sans JP,sans-serif">'+DIRS[dd/45]+'</text>';
+  }
+ }else h+='<text x="'+c+'" y="36" fill="#888" font-size="13" text-anchor="middle" font-family="Noto Sans JP,sans-serif">走り出すと表示します</text>';
+ tape.setAttribute('viewBox','0 0 '+w+' 44');tape.innerHTML=h;
 }
-new ResizeObserver(()=>{if(ml)ml.resize();drawMap()}).observe(map);
-function setZoom(d){zoom=Math.max(5,Math.min(17,zoom+d));LS.set('samletplus_zoom',zoom);drawMap()}
-$('zin').onclick=()=>setZoom(1);$('zout').onclick=()=>setZoom(-1);
+new ResizeObserver(()=>{tapeW=0;drawTape(tapeHd)}).observe(tape);
 
 /* GPS */
 function onPos(p){
@@ -239,13 +203,11 @@ function onPos(p){
  if(sp==null&&pos){const dt=(np.t-pos.t)/1000,d=dist(pos,np);if(dt>0.5)sp=d>2*Math.max(c.accuracy,pos.acc||0)?d/dt:0}
  if(sp!=null){const k=sp*3.6;speedKmh=k<2?0:(speedKmh==null?k:speedKmh*.4+k*.6)}
  gpsHeading=(c.heading!=null&&!isNaN(c.heading)&&sp!=null&&sp>2.2)?c.heading:null;
- if(c.accuracy<40){const l=trail[trail.length-1];if(!l||dist({lat:l[0],lon:l[1]},np)>8){trail.push([np.lat,np.lon]);if(trail.length>6000)trail.shift()}}
- pos=np;$('search').style.display='none';
+ pos=np;
  const g=$('gps');g.style.color=c.accuracy<=20?'#4ADE80':c.accuracy<=50?'#FFD84D':'#FF6B5B';$('gpsTxt').textContent='GPS ±'+Math.round(c.accuracy)+'m';
  if(!altBusy&&(!altLast||dist(altLast,np)>25||Date.now()-altLast.t>20000))getAlt(np.lat,np.lon);
- drawMap();
 }
-function onErr(e){const s=$('search');if(!pos){s.style.display='flex';s.innerHTML=e.code===1?'位置情報の使用が許可されていません。<br>スマホの設定で、このページの位置情報を「許可」にしてください。':'現在地を探しています…<br>空が見える場所でお待ちください。'}$('gps').style.color='#FF6B5B';$('gpsTxt').textContent='GPS ×'}
+function onErr(e){$('gps').style.color='#FF6B5B';$('gpsTxt').textContent='GPS ×';if(e.code===1&&!onErr.shown){onErr.shown=1;toast('位置情報の使用が許可されていません。スマホの設定で、このページの位置情報を「許可」にしてください。')}}
 async function getAlt(lat,lon){
  altBusy=true;
  try{const r=await fetch(`https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${lon.toFixed(6)}&lat=${lat.toFixed(6)}&outtype=JSON`,{cache:'no-store'});const j=await r.json();const e=parseFloat(j.elevation);alt=isFinite(e)?e:null}catch(e){}
@@ -336,8 +298,9 @@ function render(){
  /* 向きは走っているときのGPSの進む向きだけを使う。止まったら最後の向きのまま（方位センサーはバイクの磁気で狂うため使わない） */
  if(speedKmh!=null&&speedKmh>=8&&gpsHeading!=null)lastHd=smoothA(lastHd,gpsHeading,.5);
  const hd=lastHd;
- if(hd!=null){$('hdTxt').firstChild.textContent=DIRS[Math.round(hd/45)%8]+' ';$('hdDeg').textContent=Math.round(hd)%360+'°';$('meArrow').style.transform=`rotate(${hd}deg)`;$('meArrow').style.opacity=1}
- else{$('meArrow').style.opacity=.35;$('hdTxt').firstChild.textContent='-- ';$('hdDeg').textContent=''}
+ if(hd!=null){$('hdTxt').firstChild.textContent=DIRS[Math.round(hd/45)%8]+' ';$('hdDeg').textContent=Math.round(hd)%360+'°'}
+ else{$('hdTxt').firstChild.textContent='-- ';$('hdDeg').textContent=''}
+ drawTape(hd==null?null:Math.round(hd));
  $('vSpeed').textContent=speedKmh==null?'--':Math.round(speedKmh);
  drawGrade();
  $('vAlt').textContent=alt==null?'--':Math.round(alt);
@@ -373,7 +336,7 @@ $('mHelp').onclick=()=>{$('menu').classList.remove('on');$('opening').classList.
 /* 並べ替え */
 let tmp=order.slice(),sel=0;
 function drawSort(){
- const lb=['大きい枠','右上の枠','右下の枠'];
+ const lb=['大きい枠','左下の枠','右下の枠'];
  ['sA','sB','sC'].forEach((id,i)=>{const b=$(id);b.className=i===sel?'sel':'';b.innerHTML=`<small>${lb[i]}${i===sel?'（選択中）':''}</small>${NAMES[tmp[i]]}`});
  $('sTitle').textContent=lb[sel]+'に入れる表示';
  document.querySelectorAll('.choices button').forEach(b=>b.className=b.dataset.k===tmp[sel]?'cur':'');

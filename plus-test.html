@@ -130,7 +130,7 @@ button{font-family:inherit;cursor:pointer}
   <div class="slot" id="slotB"></div>
   <div class="slot" id="slotC"></div>
  </div>
- <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.5　© 2026 1970 OTOCHAN</div>
+ <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.6　© 2026 1970 OTOCHAN</div>
 </div>
 
 <div id="pool" hidden>
@@ -141,7 +141,7 @@ button{font-family:inherit;cursor:pointer}
 
 <div class="layer on" id="opening"><div class="box">
  <h1>Moto Meter Samlet™ Plus</h1>
- <div class="ver">試作版 Ver 0.5（テスト用）</div>
+ <div class="ver">試作版 Ver 0.6（テスト用）</div>
  <div class="note"><b>はじめにお読みください</b><br>
  このアプリは、時計・方位・地図・速度・勾配・標高を1画面に表示するバイク用メーターです。スマホの位置情報（GPS）と傾き・方位のセンサーを使います。地図（国土地理院最適化ベクトルタイル）と標高は国土地理院のデータを使います。</div>
  <div class="note"><b>安全のために</b><br>
@@ -188,7 +188,7 @@ const NAMES={speed:'速度',grade:'勾配',alt:'標高'};
 const DIRS=['北','北東','東','南東','南','南西','西','北西'];
 const R=Math.PI/180;
 
-let pos=null,speedKmh=null,rawKmh=null,gpsHeading=null,compass=null,alt=null,altBusy=false,altLast=null;
+let pos=null,speedKmh=null,rawKmh=null,gpsHeading=null,compass=null,lastHd=null,alt=null,altBusy=false,altLast=null;
 let zoom=LS.get('samletplus_zoom',15),trail=[],started=false;
 let order=LS.get('samletplus_order',['speed','grade','alt']);
 if(!Array.isArray(order)||order.length!==3||!['speed','grade','alt'].every(k=>order.includes(k)))order=['speed','grade','alt'];
@@ -333,9 +333,11 @@ $('m-grade').onclick=()=>{
 
 /* 表示の更新 */
 function render(){
- const hd=(speedKmh!=null&&speedKmh>=8&&gpsHeading!=null)?gpsHeading:compass;
+ /* 向きは走っているときのGPSの進む向きだけを使う。止まったら最後の向きのまま（方位センサーはバイクの磁気で狂うため使わない） */
+ if(speedKmh!=null&&speedKmh>=8&&gpsHeading!=null)lastHd=smoothA(lastHd,gpsHeading,.5);
+ const hd=lastHd;
  if(hd!=null){$('hdTxt').firstChild.textContent=DIRS[Math.round(hd/45)%8]+' ';$('hdDeg').textContent=Math.round(hd)%360+'°';$('meArrow').style.transform=`rotate(${hd}deg)`;$('meArrow').style.opacity=1}
- else $('meArrow').style.opacity=.35;
+ else{$('meArrow').style.opacity=.35;$('hdTxt').firstChild.textContent='-- ';$('hdDeg').textContent=''}
  $('vSpeed').textContent=speedKmh==null?'--':Math.round(speedKmh);
  drawGrade();
  $('vAlt').textContent=alt==null?'--':Math.round(alt);
@@ -353,7 +355,6 @@ $('agree').onclick=async()=>{
  if(started)return;started=true;
  try{if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function')await DeviceOrientationEvent.requestPermission()}catch(e){}
  try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function')await DeviceMotionEvent.requestPermission()}catch(e){}
- if('ondeviceorientationabsolute' in window)addEventListener('deviceorientationabsolute',onOri);else addEventListener('deviceorientation',onOri);
  addEventListener('devicemotion',onMotion);
  if(navigator.geolocation)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
  else onErr({code:2});

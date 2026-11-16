@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#000000">
+<title>Moto Meter Samlet™ Plus 試作版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Noto+Sans+JP:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--g:#4ADE80;--up:#ff8a1f;--down:#38b6ff;--alt:#fff;--line:#333;--sub:#A8A8A8;--num:'Barlow Condensed','Roboto Condensed','sans-serif-condensed',sans-serif}
+*{box-sizing:border-box;min-width:0;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#000;color:#fff;font-family:'Noto Sans JP',sans-serif;overflow:hidden;touch-action:manipulation;user-select:none;-webkit-user-select:none}
+button{font-family:inherit;cursor:pointer}
+#app{height:100dvh;display:grid;padding:max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));
+ grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) 34% auto;grid-template-areas:"top" "row2" "map" "metrics" "foot"}
+.top{grid-area:top;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-bottom:6px;border-bottom:1px solid var(--line)}
+#date{font-size:18px;font-weight:700;white-space:nowrap}
+.tr{display:flex;align-items:center;gap:10px}
+#gps{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:#888;white-space:nowrap}
+#menuBtn{width:44px;height:40px;border-radius:10px;border:1px solid #444;background:#1A1A1A;color:#fff;font-size:20px;line-height:1}
+.row2{grid-area:row2;display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--line)}
+.clock{font-family:var(--num);font-weight:600;line-height:1;white-space:nowrap}
+#hm{font-size:clamp(44px,15vw,68px)}#ss{font-size:clamp(24px,7.5vw,34px);color:var(--sub);margin-left:3px}
+.hd{display:flex;flex-direction:column;align-items:flex-end}
+.hd small{font-size:12px;color:var(--sub);font-weight:700}
+#hdTxt{font-size:clamp(20px,6.5vw,28px);font-weight:700;line-height:1.1;white-space:nowrap}
+#hdDeg{font-family:var(--num);color:var(--sub)}
+.map{grid-area:map;position:relative;overflow:hidden;border-radius:14px;background:#DCD9D2;margin:8px 0}
+#tiles img{position:absolute;left:0;top:0;width:256px;height:256px;pointer-events:none}
+#trail{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+#me{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;pointer-events:none}
+#me .halo{position:absolute;inset:-14px;border-radius:50%;background:rgba(59,130,246,.2)}
+#meArrow{position:absolute;inset:0;transition:transform .2s linear}
+.ov{position:absolute;background:rgba(0,0,0,.75);color:#fff;border-radius:10px}
+#north{top:10px;right:10px;width:44px;height:44px;border-radius:22px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.zoom{position:absolute;right:10px;top:64px;display:flex;flex-direction:column;gap:8px}
+.zoom button{width:48px;height:48px;border-radius:10px;border:none;background:rgba(0,0,0,.75);color:#fff;font-size:26px;font-weight:700}
+#scale{left:10px;bottom:10px;padding:3px 8px;display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700}
+#scaleBar{height:7px;border:2px solid #fff;border-top:none}
+#attr{position:absolute;right:6px;bottom:6px;font-size:10px;color:#333;background:rgba(255,255,255,.85);padding:1px 5px;border-radius:4px;text-decoration:none}
+#search{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:20px;background:#1A1A1A;color:#ccc;font-size:15px;line-height:1.6}
+.metrics{grid-area:metrics;display:grid;grid-template-columns:0.9fr 1.1fr;grid-template-rows:1fr 1fr;grid-template-areas:"a b" "a c";border-top:1px solid var(--line)}
+.slot{position:relative;container-type:size;overflow:hidden}
+#slotA{grid-area:a;border-right:1px solid var(--line)}
+#slotB{grid-area:b;border-bottom:1px solid var(--line)}
+#slotC{grid-area:c}
+.m{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:16px}
+.lab{position:absolute;top:6px;left:10px;font-size:13px;color:var(--sub);font-weight:700}
+.num{font-family:var(--num);font-weight:700;line-height:.9;white-space:nowrap;font-size:min(56cqh,var(--fw))}
+.u{font-size:.42em;margin-left:.06em}
+.sub{font-size:clamp(12px,9cqh,22px);font-weight:700;white-space:nowrap;margin-top:2px}
+#m-speed{--fw:56cqw}#m-speed .num{color:var(--g)}
+#m-grade{--fw:29cqw}
+#m-alt{--fw:33cqw}#m-alt .num{color:var(--alt)}
+.foot{grid-area:foot;text-align:center;font-size:10px;color:#9A9A9A;padding-top:3px;white-space:nowrap}
+@media (orientation:landscape){
+ #app{grid-template-columns:57% minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto;grid-template-areas:"map top" "map row2" "map metrics" "map foot";column-gap:14px}
+ .map{margin:0}
+ #date{font-size:15px}
+ #hm{font-size:clamp(36px,7vh + 2vw,60px)}#ss{font-size:clamp(20px,4vh + 1vw,30px)}
+ #hdTxt{font-size:clamp(18px,5vh,26px)}
+ .metrics{grid-template-columns:1fr 1fr;grid-template-rows:1.3fr 1fr;grid-template-areas:"a a" "b c"}
+ #slotA{border-right:none;border-bottom:1px solid var(--line)}
+ #slotB{border-bottom:none;border-right:1px solid var(--line)}
+ .foot{text-align:right}
+}
+/* 重ねて表示する画面 */
+.layer{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:20;display:none;overflow:auto;padding:max(18px,env(safe-area-inset-top)) 18px max(18px,env(safe-area-inset-bottom))}
+.layer.on{display:block}
+.box{max-width:560px;margin:0 auto}
+.box h2{font-size:20px;margin:4px 0 12px}
+.big{display:block;width:100%;min-height:52px;border-radius:12px;border:1px solid #555;background:#1A1A1A;color:#fff;font-size:16px;font-weight:700;margin:10px 0;padding:10px}
+.big.pri{background:var(--g);color:#000;border:none}
+#opening{background:#000}
+#opening h1{font-size:24px;margin:8px 0 4px}
+#opening .ver{color:var(--g);font-weight:700;font-size:14px}
+.note{background:#151515;border:1px solid #333;border-radius:12px;padding:14px;margin:12px 0;font-size:15px;line-height:1.75}
+.note b{color:var(--up)}
+.warnTxt{color:var(--up);font-size:12px;font-weight:700}
+.mini{display:grid;grid-template-columns:.9fr 1.1fr;grid-template-rows:1fr 1fr;gap:6px;height:180px;margin:12px 0}
+.mini button{border-radius:10px;border:2px dashed #555;background:#111;color:#fff;font-size:18px;font-weight:700;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.mini button small{font-size:11px;color:#9A9A9A}
+.mini button.sel{border:3px solid var(--g);background:#0E2416}
+.mini button.sel small{color:var(--g)}
+#sA{grid-row:span 2}
+.fixed{height:44px;border-radius:10px;background:#1A1A1A;display:flex;align-items:center;justify-content:space-between;padding:0 14px;color:#8A8A8A;font-size:13px;font-weight:700;margin-top:6px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.choices button{height:52px;border-radius:10px;border:1px solid #444;background:#262626;color:#fff;font-size:16px;font-weight:700}
+.choices button.cur{border:2px solid var(--g);background:#0E2416;color:var(--g)}
+.two{display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-top:14px}
+.two .big{margin:0}
+#toast{position:fixed;left:50%;top:22%;transform:translateX(-50%);background:#222;border:1px solid #555;color:#fff;padding:12px 18px;border-radius:12px;font-size:15px;font-weight:700;z-index:40;display:none;max-width:90vw;text-align:center}
+</style>
+</head>
+<body>
+<div id="app">
+ <div class="top">
+  <span id="date">----年--月--日</span>
+  <div class="tr">
+   <span id="gps"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span id="gpsTxt">GPS</span></span>
+   <button id="menuBtn" aria-label="メニュー">≡</button>
+  </div>
+ </div>
+ <div class="row2">
+  <div class="clock"><span id="hm">--:--</span><span id="ss">:--</span></div>
+  <div class="hd"><small>方位</small><span id="hdTxt">-- <span id="hdDeg"></span></span></div>
+ </div>
+ <div class="map" id="map">
+  <div id="tiles"></div>
+  <canvas id="trail"></canvas>
+  <div id="me"><div class="halo"></div>
+   <svg id="meArrow" viewBox="0 0 46 46" aria-hidden="true"><path d="M23 4 L37 38 L23 31 L9 38 Z" fill="#1D4ED8" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>
+  </div>
+  <div id="north" class="ov"><svg width="14" height="12" viewBox="0 0 14 12" aria-hidden="true"><path d="M7 0 L14 12 H0 Z" fill="#FF6B5B"/></svg>北</div>
+  <div class="zoom"><button id="zin" aria-label="拡大">＋</button><button id="zout" aria-label="縮小">－</button></div>
+  <div id="scale" class="ov"><span id="scaleBar" style="width:60px"></span><span id="scaleTxt"></span></div>
+  <a id="attr" href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院地図</a>
+  <div id="search">現在地を探しています…<br>空が見える場所でお待ちください。</div>
+ </div>
+ <div class="metrics">
+  <div class="slot" id="slotA"></div>
+  <div class="slot" id="slotB"></div>
+  <div class="slot" id="slotC"></div>
+ </div>
+ <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.1　© 2026 1970 OTOCHAN</div>
+</div>
+
+<div id="pool" hidden>
+ <div class="m" id="m-speed"><span class="lab">速度</span><span class="num" id="vSpeed">--</span><span class="sub">km/h</span></div>
+ <div class="m" id="m-grade"><span class="lab">勾配</span><span class="num" id="vGrade">--</span><span class="sub" id="gDir">水平リセット前</span></div>
+ <div class="m" id="m-alt"><span class="lab">標高</span><span class="num"><span id="vAlt">--</span><span class="u">m</span></span><span class="sub" style="color:var(--sub)">地理院</span></div>
+</div>
+
+<div class="layer on" id="opening"><div class="box">
+ <h1>Moto Meter Samlet™ Plus</h1>
+ <div class="ver">試作版 Ver 0.1（テスト用）</div>
+ <div class="note"><b>はじめにお読みください</b><br>
+ このアプリは、時計・方位・地図・速度・勾配・標高を1画面に表示するバイク用メーターです。スマホの位置情報（GPS）と傾き・方位のセンサーを使います。地図と標高は国土地理院のデータを使います。</div>
+ <div class="note"><b>安全のために</b><br>
+ 走行中は本アプリの操作・注視をしないでください。設定や並べ替えは、安全な場所に止まってから行ってください。スマホはホルダーにしっかり固定してください。</div>
+ <div class="note"><b>勾配について</b><br>
+ 平らな場所にバイクを止め、メニューの「勾配の水平リセット」を押してからお使いください。加速・減速やエンジンの振動で表示がゆれることがあります。</div>
+ <div class="note"><b>免責事項</b><br>
+ 本アプリは無料で提供しており、表示の正確さ・動作を保証するものではありません。本アプリの使用または使用できなかったことにより生じた事故・損害・トラブル等について、作者は一切の責任を負いません。走行中は本アプリの操作・注視をせず、交通ルールを守って安全運転でご利用ください。</div>
+ <div class="note"><b>利用条件</b><br>
+ アプリそのものの無断での再配布・改変・販売はご遠慮ください。スクリーンショットやリンクでの紹介は自由です。</div>
+ <button class="big pri" id="agree">同意してスタート</button>
+</div></div>
+
+<div class="layer" id="menu"><div class="box">
+ <h2>メニュー</h2>
+ <div class="warnTxt">止まっているときだけ使えます</div>
+ <button class="big" id="mSort">並べ替え（速度・勾配・標高）</button>
+ <button class="big" id="mReset">勾配の水平リセット</button>
+ <button class="big" id="mFlip">勾配の上下反転：通常</button>
+ <button class="big" id="mHelp">注意書きを見る</button>
+ <button class="big pri" id="mClose">閉じる</button>
+</div></div>
+
+<div class="layer" id="sort"><div class="box">
+ <h2>並べ替え</h2>
+ <div class="warnTxt">止まっているときだけ使えます</div>
+ <p style="font-size:14px;color:#B0B0B0;line-height:1.6;margin:8px 0">変えたい枠をタップして、入れる表示を選んでください。並びは縦向き・横向きで共通です。</p>
+ <div class="fixed"><span>日付・時計・方位・地図</span><span>固定</span></div>
+ <div class="mini"><button id="sA"></button><button id="sB"></button><button id="sC"></button></div>
+ <div style="font-size:13px;color:#B0B0B0;font-weight:700;margin:6px 0 8px" id="sTitle"></div>
+ <div class="choices"><button data-k="speed">速度</button><button data-k="grade">勾配</button><button data-k="alt">標高</button></div>
+ <p style="font-size:12px;color:#9A9A9A;line-height:1.5">ほかの枠にある表示を選ぶと、2つの場所が入れ替わります。</p>
+ <div class="two"><button class="big" id="sUndo">元に戻す</button><button class="big pri" id="sDone">完了（保存する）</button></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+{
+const $=id=>document.getElementById(id);
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const pad=n=>String(n).padStart(2,'0');
+const WD=['日','月','火','水','木','金','土'];
+const NAMES={speed:'速度',grade:'勾配',alt:'標高'};
+const DIRS=['北','北東','東','南東','南','南西','西','北西'];
+const R=Math.PI/180;
+
+let pos=null,speedKmh=null,gpsHeading=null,compass=null,alt=null,altBusy=false,altLast=null;
+let zoom=LS.get('samletplus_zoom',16),trail=[],started=false;
+let order=LS.get('samletplus_order',['speed','grade','alt']);
+if(!Array.isArray(order)||order.length!==3||!['speed','grade','alt'].every(k=>order.includes(k)))order=['speed','grade','alt'];
+let flip=LS.get('samletplus_flip',false);
+
+function toast(t){const e=$('toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2500)}
+
+/* 時計 */
+function tick(){const d=new Date();$('date').textContent=`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${WD[d.getDay()]}）`;$('hm').textContent=`${pad(d.getHours())}:${pad(d.getMinutes())}`;$('ss').textContent=':'+pad(d.getSeconds())}
+setInterval(tick,250);tick();
+
+/* 枠の並び */
+function place(){['slotA','slotB','slotC'].forEach((s,i)=>$(s).appendChild($('m-'+order[i])))}
+place();
+
+/* 地図 */
+const map=$('map'),tiles=$('tiles'),cv=$('trail'),tileEls=new Map();
+const lx=(lon,z)=>(lon+180)/360*256*2**z;
+const ly=(lat,z)=>{const r=lat*R;return(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*256*2**z};
+function dist(a,b){const dl=(b.lat-a.lat)*R,dn=(b.lon-a.lon)*R,h=Math.sin(dl/2)**2+Math.cos(a.lat*R)*Math.cos(b.lat*R)*Math.sin(dn/2)**2;return 12742000*Math.asin(Math.sqrt(h))}
+function drawMap(){
+ if(!pos)return;
+ const w=map.clientWidth,h=map.clientHeight,z=zoom,n=2**z;
+ const x0=lx(pos.lon,z)-w/2,y0=ly(pos.lat,z)-h/2;
+ const need=new Set();
+ for(let ty=Math.floor(y0/256);ty<=Math.floor((y0+h)/256);ty++){
+  if(ty<0||ty>=n)continue;
+  for(let tx=Math.floor(x0/256);tx<=Math.floor((x0+w)/256);tx++){
+   const k=z+'/'+(((tx%n)+n)%n)+'/'+ty;need.add(k);
+   let im=tileEls.get(k);
+   if(!im){im=new Image();im.alt='';im.draggable=false;im.onerror=()=>{im.style.visibility='hidden'};im.src='https://cyberjapandata.gsi.go.jp/xyz/std/'+k+'.png';tiles.appendChild(im);tileEls.set(k,im)}
+   im.style.transform=`translate(${Math.round(tx*256-x0)}px,${Math.round(ty*256-y0)}px)`;
+  }
+ }
+ for(const [k,im] of tileEls)if(!need.has(k)){im.remove();tileEls.delete(k)}
+ const dpr=window.devicePixelRatio||1;
+ if(cv.width!==Math.round(w*dpr)||cv.height!==Math.round(h*dpr)){cv.width=Math.round(w*dpr);cv.height=Math.round(h*dpr)}
+ const c=cv.getContext('2d');c.setTransform(dpr,0,0,dpr,0,0);c.clearRect(0,0,w,h);
+ if(trail.length){c.strokeStyle='#16A34A';c.globalAlpha=.85;c.lineWidth=5;c.lineCap='round';c.lineJoin='round';c.beginPath();
+  trail.forEach((p,i)=>{const X=lx(p[1],z)-x0,Y=ly(p[0],z)-y0;i?c.lineTo(X,Y):c.moveTo(X,Y)});c.lineTo(w/2,h/2);c.stroke();c.globalAlpha=1}
+ const mpp=156543.03392*Math.cos(pos.lat*R)/n,want=mpp*90;
+ let nice=10;for(const s of [10,20,50,100,200,500,1000,2000,5000,10000,20000,50000,100000])if(s<=want)nice=s;
+ $('scaleBar').style.width=Math.round(nice/mpp)+'px';$('scaleTxt').textContent=nice>=1000?(nice/1000)+'km':nice+'m';
+}
+new ResizeObserver(drawMap).observe(map);
+function setZoom(d){zoom=Math.max(6,Math.min(18,zoom+d));LS.set('samletplus_zoom',zoom);drawMap()}
+$('zin').onclick=()=>setZoom(1);$('zout').onclick=()=>setZoom(-1);
+
+/* GPS */
+function onPos(p){
+ const c=p.coords,np={lat:c.latitude,lon:c.longitude,acc:c.accuracy,t:p.timestamp};
+ let sp=(c.speed!=null&&!isNaN(c.speed))?c.speed:null;
+ if(sp==null&&pos){const dt=(np.t-pos.t)/1000;if(dt>0.5)sp=dist(pos,np)/dt}
+ if(sp!=null){const k=sp*3.6;speedKmh=k<2?0:(speedKmh==null?k:speedKmh*.4+k*.6)}
+ gpsHeading=(c.heading!=null&&!isNaN(c.heading)&&sp!=null&&sp>2.2)?c.heading:null;
+ if(c.accuracy<40){const l=trail[trail.length-1];if(!l||dist({lat:l[0],lon:l[1]},np)>8){trail.push([np.lat,np.lon]);if(trail.length>6000)trail.shift()}}
+ pos=np;$('search').style.display='none';
+ const g=$('gps');g.style.color=c.accuracy<=20?'#4ADE80':c.accuracy<=50?'#FFD84D':'#FF6B5B';$('gpsTxt').textContent='GPS ±'+Math.round(c.accuracy)+'m';
+ if(!altBusy&&(!altLast||dist(altLast,np)>25||Date.now()-altLast.t>20000))getAlt(np.lat,np.lon);
+ drawMap();
+}
+function onErr(e){const s=$('search');if(!pos){s.style.display='flex';s.innerHTML=e.code===1?'位置情報の使用が許可されていません。<br>スマホの設定で、このページの位置情報を「許可」にしてください。':'現在地を探しています…<br>空が見える場所でお待ちください。'}$('gps').style.color='#FF6B5B';$('gpsTxt').textContent='GPS ×'}
+async function getAlt(lat,lon){
+ altBusy=true;
+ try{const r=await fetch(`https://cyberjapandata2.gsi.go.jp/general/dem/scripts/getelevation.php?lon=${lon.toFixed(6)}&lat=${lat.toFixed(6)}&outtype=JSON`,{cache:'no-store'});const j=await r.json();const e=parseFloat(j.elevation);alt=isFinite(e)?e:null}catch(e){}
+ altLast={lat,lon,t:Date.now()};altBusy=false;
+}
+
+/* 方位 */
+const scrAngle=()=>{const a=(screen.orientation&&screen.orientation.angle)??window.orientation??0;return((a%360)+360)%360};
+function smoothA(p,h,k){if(p==null)return h;const d=((h-p+540)%360)-180;return(p+d*k+360)%360}
+function onOri(e){
+ let h=null;
+ if(e.webkitCompassHeading!=null)h=e.webkitCompassHeading;
+ else if(e.absolute&&e.alpha!=null)h=360-e.alpha;
+ if(h==null)return;
+ h=(h+scrAngle()+360)%360;compass=smoothA(compass,h,.15);
+}
+
+/* 勾配（Moto Meter Samlet・勾配メーターと同じ計算）
+   なめらかにする時間1.0秒／加速・ブレーキ中は数字を止める／表示の切り替えはゆっくり */
+const SMOOTH=1.0,SHAKE_ON=1.2;
+let fu=null,fz=null,last=0,curO=null,zero=null,cal=null,gotMotion=false;
+let sx=0,sy=0,sz=0,shakeUntil=0,freezeFrom=0,frozen=false,shown=null,pendT=0,hist=[],pSum=0,pN=0;
+function loadZero(){const o=scrAngle();if(o===curO)return;curO=o;const z=parseFloat(LS.get('samletplus_zero_'+o,NaN));zero=isNaN(z)?null:z;fu=null;fz=null;shown=null;hist=[]}
+function onMotion(e){
+ const g=e.accelerationIncludingGravity;if(!g||g.x==null)return;
+ gotMotion=true;loadZero();const o=curO;
+ const u=o===90?g.x:o===270?-g.x:o===180?-g.y:g.y,z=g.z;
+ const now=performance.now(),dt=last?Math.min((now-last)/1000,0.2):0.02;last=now;
+ if(cal){cal.u+=u;cal.z+=z;cal.n++}
+ const la=e.acceleration,ks=1-Math.exp(-dt/0.15);
+ if(la&&la.x!=null){sx+=ks*(la.x-sx);sy+=ks*(la.y-sy);sz+=ks*(la.z-sz)}else{sx+=ks*(g.x-sx);sy+=ks*(g.y-sy);sz+=ks*(g.z-sz)}
+ const mag=(la&&la.x!=null)?Math.hypot(sx,sy,sz):Math.abs(Math.hypot(sx,sy,sz)-9.81);
+ if(mag>SHAKE_ON)shakeUntil=now+800;
+ const was=frozen;frozen=fu!==null&&now<shakeUntil;
+ if(frozen){if(!freezeFrom)freezeFrom=now;if(now-freezeFrom>5000)frozen=false}else freezeFrom=0;
+ if(frozen){if(!was){const old=hist.find(q=>q.t>=now-600);if(old){fu=old.fu;fz=old.fz}}return}
+ const k=1-Math.exp(-dt/SMOOTH);
+ if(fu===null){fu=u;fz=z}else{fu+=k*(u-fu);fz+=k*(z-fz)}
+ hist.push({t:now,fu,fz});while(hist.length&&hist[0].t<now-1200)hist.shift();
+}
+function wrap(a){while(a>Math.PI)a-=2*Math.PI;while(a<-Math.PI)a+=2*Math.PI;return a}
+function settle(p){
+ const now=performance.now();
+ if(shown===null){shown=Math.round(p);pendT=0;return shown}
+ if(Math.abs(p-shown)<0.8){pendT=0;pSum=0;pN=0;return shown}
+ if(!pendT){pendT=now;pSum=0;pN=0}
+ pSum+=p;pN++;const avg=pSum/pN,diff=Math.abs(avg-shown);
+ if(now-pendT>=(diff>=1.8?500:1500)&&Math.round(avg)!==shown){shown=Math.round(avg);pendT=0;pSum=0;pN=0}
+ return shown;
+}
+function drawGrade(){
+ const vg=$('vGrade'),gd=$('gDir');
+ if(fu===null){vg.textContent='--';vg.style.color='#fff';gd.textContent=gotMotion?'計測中':'センサー待ち';gd.style.color='var(--sub)';return}
+ if(zero===null){vg.textContent='--';vg.style.color='#fff';gd.textContent='水平リセット前';gd.style.color='var(--sub)';return}
+ let a=-wrap(Math.atan2(fz,fu)-zero);if(flip)a=-a;
+ const p=Math.tan(a)*100,r=frozen?(shown===null?Math.round(p):shown):settle(p);
+ if(frozen)pendT=0;
+ let lab='平坦',c='#fff',mark='';
+ if(r>=1){lab='上り';c='var(--up)';mark='▲'}else if(r<=-1){lab='下り';c='var(--down)';mark='▼'}
+ vg.innerHTML=(mark?'<span class="u">'+mark+'</span>':'')+Math.min(99,Math.abs(r))+'<span class="u">%</span>';
+ vg.style.color=c;gd.textContent=frozen?'加速・減速中は停止':lab;gd.style.color=frozen?'var(--sub)':c;
+}
+function doZero(){
+ if(fu===null){toast('傾きセンサーの値がまだ届いていません');return}
+ loadZero();cal={u:0,z:0,n:0};toast('水平を測っています…スマホに触らないでください');
+ setTimeout(()=>{const c=cal;cal=null;if(!c||c.n<5){toast('うまく測れませんでした。もう一度押してください');return}
+  zero=Math.atan2(c.z/c.n,c.u/c.n);shown=null;LS.set('samletplus_zero_'+curO,zero);toast('水平を設定しました（0%）')},1500);
+}
+
+/* 表示の更新 */
+function render(){
+ const hd=(speedKmh!=null&&speedKmh>=8&&gpsHeading!=null)?gpsHeading:compass;
+ if(hd!=null){$('hdTxt').firstChild.textContent=DIRS[Math.round(hd/45)%8]+' ';$('hdDeg').textContent=Math.round(hd)%360+'°';$('meArrow').style.transform=`rotate(${hd}deg)`;$('meArrow').style.opacity=1}
+ else $('meArrow').style.opacity=.35;
+ $('vSpeed').textContent=speedKmh==null?'--':Math.round(speedKmh);
+ drawGrade();
+ $('vAlt').textContent=alt==null?'--':Math.round(alt);
+}
+setInterval(render,150);
+
+/* 画面を消さない */
+let lock=null;
+async function keepOn(){try{if('wakeLock' in navigator&&document.visibilityState==='visible')lock=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(started&&document.visibilityState==='visible')keepOn()});
+
+/* スタート */
+$('agree').onclick=async()=>{
+ $('opening').classList.remove('on');
+ if(started)return;started=true;
+ try{if(window.DeviceOrientationEvent&&typeof DeviceOrientationEvent.requestPermission==='function')await DeviceOrientationEvent.requestPermission()}catch(e){}
+ try{if(window.DeviceMotionEvent&&typeof DeviceMotionEvent.requestPermission==='function')await DeviceMotionEvent.requestPermission()}catch(e){}
+ if('ondeviceorientationabsolute' in window)addEventListener('deviceorientationabsolute',onOri);else addEventListener('deviceorientation',onOri);
+ addEventListener('devicemotion',onMotion);
+ if(navigator.geolocation)navigator.geolocation.watchPosition(onPos,onErr,{enableHighAccuracy:true,maximumAge:0,timeout:20000});
+ else onErr({code:2});
+ keepOn();
+ loadZero();if(zero===null)setTimeout(()=>toast('平らな場所で、メニューの「勾配の水平リセット」を押してください'),1200);
+};
+
+/* メニュー */
+const moving=()=>speedKmh!=null&&speedKmh>=5;
+function guard(){if(moving()){toast('止まってから操作してください');return false}return true}
+const flipTxt=()=>$('mFlip').textContent='勾配の上下反転：'+(flip?'反転中':'通常');flipTxt();
+$('menuBtn').onclick=()=>{if(guard())$('menu').classList.add('on')};
+$('mClose').onclick=()=>$('menu').classList.remove('on');
+$('mReset').onclick=()=>{if(!guard())return;$('menu').classList.remove('on');doZero()};
+$('mFlip').onclick=()=>{if(!guard())return;flip=!flip;shown=null;LS.set('samletplus_flip',flip);flipTxt()};
+$('mHelp').onclick=()=>{$('menu').classList.remove('on');$('opening').classList.add('on')};
+
+/* 並べ替え */
+let tmp=order.slice(),sel=0;
+function drawSort(){
+ const lb=['大きい枠','右上の枠','右下の枠'];
+ ['sA','sB','sC'].forEach((id,i)=>{const b=$(id);b.className=i===sel?'sel':'';b.innerHTML=`<small>${lb[i]}${i===sel?'（選択中）':''}</small>${NAMES[tmp[i]]}`});
+ $('sTitle').textContent=lb[sel]+'に入れる表示';
+ document.querySelectorAll('.choices button').forEach(b=>b.className=b.dataset.k===tmp[sel]?'cur':'');
+}
+['sA','sB','sC'].forEach((id,i)=>$(id).onclick=()=>{sel=i;drawSort()});
+document.querySelectorAll('.choices button').forEach(b=>b.onclick=()=>{const k=b.dataset.k,j=tmp.indexOf(k);[tmp[sel],tmp[j]]=[tmp[j],tmp[sel]];drawSort()});
+$('mSort').onclick=()=>{if(!guard())return;tmp=order.slice();sel=0;drawSort();$('menu').classList.remove('on');$('sort').classList.add('on')};
+$('sUndo').onclick=()=>{tmp=order.slice();drawSort()};
+$('sDone').onclick=()=>{order=tmp.slice();LS.set('samletplus_order',order);place();$('sort').classList.remove('on');toast('並びを保存しました')};
+}
+</script>
+</body>
+</html>

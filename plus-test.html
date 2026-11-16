@@ -24,7 +24,7 @@ button{font-family:inherit;cursor:pointer}
 #menuBtn{width:44px;height:40px;border-radius:10px;border:1px solid #444;background:#1A1A1A;color:#fff;font-size:20px;line-height:1}
 .crow{grid-area:clock;display:flex;justify-content:center;align-items:baseline;padding:6px 0 4px;border-bottom:1px solid var(--line)}
 .clock{font-family:var(--num);font-weight:600;line-height:1;white-space:nowrap}
-#hm{font-size:clamp(60px,24vw,104px)}#ss{font-size:clamp(30px,12vw,52px);color:var(--sub);margin-left:5px}
+#hm{font-size:clamp(50px,20vw,86px)}#ss{font-size:clamp(25px,10vw,43px);color:var(--sub);margin-left:5px}
 .hdrow{grid-area:hd;padding:6px 0 4px;border-bottom:1px solid var(--line)}
 .hdline{display:flex;justify-content:space-between;align-items:baseline}
 .hdline small{font-size:13px;color:var(--sub);font-weight:700}
@@ -41,7 +41,7 @@ button{font-family:inherit;cursor:pointer}
 .num{font-family:var(--num);font-weight:700;line-height:.9;white-space:nowrap;font-size:min(56cqh,var(--fw))}
 .u{font-size:.42em;margin-left:.06em}
 .sub{font-size:clamp(12px,9cqh,22px);font-weight:700;white-space:nowrap;margin-top:2px}
-#m-speed{--fw:44cqw}#m-speed .num{color:var(--g)}
+#m-speed{--fw:36cqw}#m-speed .num{color:var(--g);font-size:min(46cqh,var(--fw))}
 #m-grade{--fw:29cqw}
 #m-alt{--fw:33cqw}#m-alt .num{color:var(--alt)}
 .sub.msg{white-space:normal;text-align:center;font-size:clamp(12px,8cqh,17px);line-height:1.35;padding:0 8px}
@@ -51,7 +51,7 @@ button{font-family:inherit;cursor:pointer}
 @media (orientation:landscape){
  #app{grid-template-columns:40% minmax(0,1fr);grid-template-rows:auto auto auto minmax(0,1fr) auto;grid-template-areas:"top metrics" "clock metrics" "hd metrics" ". metrics" "foot metrics";column-gap:16px}
  #date{font-size:15px}
- #hm{font-size:clamp(44px,14vh + 2vw,88px)}#ss{font-size:clamp(22px,7vh + 1vw,44px)}
+ #hm{font-size:clamp(38px,12vh + 1.5vw,72px)}#ss{font-size:clamp(19px,6vh + .7vw,36px)}
  #hdTxt{font-size:clamp(18px,5vh,26px)}
  .metrics{border-left:1px solid var(--line);padding-left:12px}
  .foot{text-align:left}
@@ -103,7 +103,7 @@ button{font-family:inherit;cursor:pointer}
   <div class="slot" id="slotB"></div>
   <div class="slot" id="slotC"></div>
  </div>
- <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.7　© 2026 1970 OTOCHAN</div>
+ <div class="foot">Moto Meter Samlet™ Plus 試作版 Ver 0.8　© 2026 1970 OTOCHAN</div>
 </div>
 
 <div id="pool" hidden>
@@ -114,7 +114,7 @@ button{font-family:inherit;cursor:pointer}
 
 <div class="layer on" id="opening"><div class="box">
  <h1>Moto Meter Samlet™ Plus</h1>
- <div class="ver">試作版 Ver 0.7（テスト用）</div>
+ <div class="ver">試作版 Ver 0.8（テスト用）</div>
  <div class="note"><b>はじめにお読みください</b><br>
  このアプリは、日付・時計・方位・速度・勾配・標高を1画面に表示するバイク用メーターです。スマホの位置情報（GPS）と傾きセンサーを使います。方位は走っているときの進む向きから求め、止まっている間は最後の向きを表示します。標高は国土地理院のデータを使います。</div>
  <div class="note"><b>安全のために</b><br>

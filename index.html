@@ -96,7 +96,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 <body>
 
 <div class="app" id="app">
-  <div class="top"><span>Ver 2.0</span><span id="wake">画面ON：確認中</span></div>
+  <div class="top"><span>Ver 2.1</span><span id="wake">画面ON：確認中</span></div>
 
   <div class="cell" id="clk">
     <div class="box"><span id="date">--/--(-)</span><div class="n"><span id="hm">--:--</span><span class="s" id="sec">--</span></div></div>
@@ -141,7 +141,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 
 <div class="op" id="op" role="dialog" aria-label="ご利用の前に">
   <h1>Moto Meter Samlet™</h1>
-  <div class="y">モトメーター サムレット　Ver 2.0</div>
+  <div class="y">モトメーター サムレット　Ver 2.1</div>
 
   <div class="warn">
     <h2>必ずお読みください</h2>
@@ -151,7 +151,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
       <li>表示される数値は<b>目安</b>です。バイクのメーターや道路標識の代わりにはなりません。</li>
       <li>標高は国土地理院のデータ（地面の高さ）です。橋・高架の上やトンネルの中では実際と違う値になり、電波がないときはGPSの高さ（目安）を表示します。</li>
       <li>勾配はスマホの傾きから計算します。加速・ブレーキ中や段差では数値がずれます。</li>
-      <li>方位は、走行中はGPSで「進んでいる向き」を、停車中はスマホの方位センサーを使って表示します。停車中はエンジンや金属のホルダーの影響でずれることがあります（ずれるときは、スマホを空中で「8の字」にゆっくり振ると直ることがあります）。</li>
+      <li>方位は、走行中はGPSで「進んでいる向き」を表示し、停車中は最後に走っていた方角をそのまま表示します。走り出す前だけはスマホの方位センサーを使うため、エンジンや金属のホルダーの影響でずれることがあります（ずれるときは、スマホを空中で「8の字」にゆっくり振ると直ることがあります）。</li>
       <li>位置情報（GPS）を使うため、電池を多く使います。</li>
     </ul>
   </div>
@@ -283,9 +283,12 @@ function startCompass(){
 }
 function drawDir(){
   const t=Date.now();let h=null,st;
+  /* Ver 2.1：止まったら、最後に走っていた方角をそのまま表示（止まった瞬間に方角が跳ばないように）。
+     方位センサーは、アプリを開いてまだ一度も走っていないときだけ使う */
   if(gH!==null&&t-gT<3000){h=gH;st="走行中：GPS"}
-  else if(mH!==null&&t-mT<2000){h=mH;st="停車中：方位センサー"}
-  else st=gH!==null?"止まっています（方位センサーなし）":"走り出すと表示します";
+  else if(gH!==null){h=gH;st="停車中：最後の進行方向"}
+  else if(mH!==null&&t-mT<2000){h=mH;st="走り出す前：方位センサー"}
+  else st="走り出すと表示します";
   $("dirSt").textContent=st;
   if(h===null){$("hd").textContent="--";$("deg").textContent="---°";return}
   const deg=Math.round(h)%360;

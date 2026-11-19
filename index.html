@@ -39,7 +39,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);overflow:hidd
 #clk .n{font-size:min(17cqw,85cqh)}
 .dirbox{gap:6%}
 #rose{height:92cqh;width:auto;max-width:42cqw;aspect-ratio:1;flex:none}
-#rose .rt{transition:transform .25s linear}
+#rose .rt,#rose .up{transition:transform .25s linear}
+#rose .up{transform-box:fill-box;transform-origin:center}
 .dtx{display:flex;flex-direction:column;align-items:flex-start;line-height:1.05}
 #hd{font-family:var(--f-ui);font-weight:700;font-size:min(15cqw,46cqh)}
 #deg{font-family:var(--f-num);font-weight:700;color:#cfcfca;font-size:min(8cqw,24cqh);font-variant-numeric:tabular-nums}
@@ -96,7 +97,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 <body>
 
 <div class="app" id="app">
-  <div class="top"><span>Ver 2.2</span><span id="wake">画面ON：確認中</span></div>
+  <div class="top"><span>Ver 2.3</span><span id="wake">画面ON：確認中</span></div>
 
   <div class="cell" id="clk">
     <div class="box"><span id="date">--/--(-)</span><div class="n"><span id="hm">--:--</span><span class="s" id="sec">--</span></div></div>
@@ -106,14 +107,15 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
     <div class="lb"><span>方位</span><span class="st" id="dirSt">センサー待ち…</span></div>
     <div class="box dirbox">
       <svg id="rose" viewBox="0 0 100 100" aria-hidden="true">
-        <circle cx="50" cy="50" r="46" fill="none" stroke="#555" stroke-width="2.5"/>
+        <circle cx="50" cy="50" r="47" fill="#0b0b0b" stroke="#5F5E5A" stroke-width="2"/>
         <g class="rt" id="roseG">
-          <text x="50" y="18" text-anchor="middle" font-size="15" font-weight="700" fill="#ff4d4d">北</text>
-          <text x="50" y="94" text-anchor="middle" font-size="13" fill="#9a9a94">南</text>
-          <text x="89" y="55" text-anchor="middle" font-size="13" fill="#9a9a94">東</text>
-          <text x="11" y="55" text-anchor="middle" font-size="13" fill="#9a9a94">西</text>
+          <g stroke="#888" stroke-width="2"><line x1="70" y1="15.4" x2="73" y2="10.2"/><line x1="84.6" y1="30" x2="89.8" y2="27"/><line x1="84.6" y1="70" x2="89.8" y2="73"/><line x1="70" y1="84.6" x2="73" y2="89.8"/><line x1="30" y1="84.6" x2="27" y2="89.8"/><line x1="15.4" y1="70" x2="10.2" y2="73"/><line x1="15.4" y1="30" x2="10.2" y2="27"/><line x1="30" y1="15.4" x2="27" y2="10.2"/></g>
+          <text class="up" x="50" y="17" text-anchor="middle" dominant-baseline="central" font-size="24" font-weight="700" fill="#e8191a" stroke="#fff" stroke-width="2.6" stroke-linejoin="round" paint-order="stroke">北</text>
+          <text class="up" x="83" y="50" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="700" fill="#fff">東</text>
+          <text class="up" x="50" y="83" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="700" fill="#fff">南</text>
+          <text class="up" x="17" y="50" text-anchor="middle" dominant-baseline="central" font-size="22" font-weight="700" fill="#fff">西</text>
         </g>
-        <polygon points="50,24 58,58 50,51 42,58" fill="#97C459"/>
+        <polygon points="50,32 57,60 50,54 43,60" fill="#97C459"/>
       </svg>
       <div class="dtx"><span id="hd">--</span><span id="deg">---°</span></div>
     </div>
@@ -141,7 +143,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 
 <div class="op" id="op" role="dialog" aria-label="ご利用の前に">
   <h1>Moto Meter Samlet™</h1>
-  <div class="y">モトメーター サムレット　Ver 2.2</div>
+  <div class="y">モトメーター サムレット　Ver 2.3</div>
 
   <div class="warn">
     <h2>必ずお読みください</h2>
@@ -297,6 +299,8 @@ function drawDir(){
   $("deg").textContent=dShow+"°";
   let target=-dShow,diff=((target-rotNow)%360+540)%360-180;rotNow+=diff;
   $("roseG").style.transform="rotate("+rotNow+"deg)";
+  /* Ver 2.3：東西南北の文字は、円盤が回っても逆に回して、いつもまっすぐ立てる */
+  document.querySelectorAll("#rose .up").forEach(e=>{e.style.transform="rotate("+(-rotNow)+"deg)"});
 }
 $("roseG").style.transformOrigin="50px 50px";
 setInterval(drawDir,250);

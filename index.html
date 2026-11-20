@@ -97,7 +97,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 <body>
 
 <div class="app" id="app">
-  <div class="top"><span>Ver 2.4</span><span id="wake">画面ON：確認中</span></div>
+  <div class="top"><span>Ver 2.5</span><span id="wake">画面ON：確認中</span></div>
 
   <div class="cell" id="clk">
     <div class="box"><span id="date">--/--(-)</span><div class="n"><span id="hm">--:--</span><span class="s" id="sec">--</span></div></div>
@@ -143,7 +143,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 
 <div class="op" id="op" role="dialog" aria-label="ご利用の前に">
   <h1>Moto Meter Samlet™</h1>
-  <div class="y">モトメーター サムレット　Ver 2.4</div>
+  <div class="y">モトメーター サムレット　Ver 2.5</div>
 
   <div class="warn">
     <h2>必ずお読みください</h2>
@@ -308,10 +308,10 @@ setInterval(drawDir,250);
 /* ---------- 勾配：スマホの傾きセンサー（勾配メーターと同じ計算） ---------- */
 let fu=null,fz=null,last=0,curO=null,zero=null,cal=null,gotMotion=false;
 /* 数字のちらつきを抑える仕組み（Ver 1.4）
-   ①なめらかにする時間 1.0秒
+   ①なめらかにする時間 0.6秒（Ver 2.5）
    ②加速・ブレーキ中（前後の強い揺れ）は計算を止め、直前の数字を出したままにする
-   ③表示の数字は、今の表示との違いが約2%以上で0.5秒、約1%で1.5秒続いたときだけ切り替える */
-const SMOOTH=1.0,SHAKE_ON=1.2;
+   ③表示の数字は、今の表示との違いが約2%以上で0.3秒、約1%で0.8秒続いたときだけ切り替える（Ver 2.5） */
+const SMOOTH=0.6,SHAKE_ON=1.5; /* Ver 2.5：感度を上げた（以前は 1.0秒・1.2） */
 let sx=0,sy=0,sz=0,shakeUntil=0,freezeFrom=0,frozen=false,shown=null,pendT=0,hist=[];
 let rev=store.get("samlet_rev")==="1";
 function orient(){
@@ -358,7 +358,7 @@ function settle(p){
   if(!pendT){pendT=now;pSum=0;pN=0}
   pSum+=p;pN++;
   const avg=pSum/pN,diff=Math.abs(avg-shown);
-  if(now-pendT>=(diff>=1.8?500:1500)&&Math.round(avg)!==shown){shown=Math.round(avg);pendT=0;pSum=0;pN=0}
+  if(now-pendT>=(diff>=1.8?300:800)&&Math.round(avg)!==shown){shown=Math.round(avg);pendT=0;pSum=0;pN=0}
   return shown;
 }
 function setC(c){document.documentElement.style.setProperty("--c",c)}

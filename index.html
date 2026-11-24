@@ -92,7 +92,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 .legal p{margin:0 0 6px}
 .legal .cr{text-align:center;color:#ddd}
 .err{color:var(--up);font-size:13px;text-align:center;min-height:1em}
-/* Ver 2.7：計測していない状態の文言を点滅 */
+/* Ver 2.7：計測していない状態の文言を点滅（Ver 2.8：勾配の数字も点滅） */
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
 .blink{animation:blink 1.2s ease-in-out infinite}
 </style>
@@ -100,7 +100,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 <body>
 
 <div class="app" id="app">
-  <div class="top"><span>Ver 2.7</span><span id="wake">画面ON：確認中</span></div>
+  <div class="top"><span>Ver 2.8</span><span id="wake">画面ON：確認中</span></div>
 
   <div class="cell" id="clk">
     <div class="box"><span id="date">--/--(-)</span><div class="n"><span id="hm">--:--</span><span class="s" id="sec">--</span></div></div>
@@ -146,7 +146,7 @@ button:focus-visible{outline:3px solid var(--up);outline-offset:2px}
 
 <div class="op" id="op" role="dialog" aria-label="ご利用の前に">
   <h1>Moto Meter Samlet™</h1>
-  <div class="y">モトメーター サムレット　Ver 2.7</div>
+  <div class="y">モトメーター サムレット　Ver 2.8</div>
 
   <div class="warn">
     <h2>必ずお読みください</h2>
@@ -367,9 +367,10 @@ function settle(p){
 }
 function setC(c){document.documentElement.style.setProperty("--c",c)}
 function drawGrade(){
-  if(fu===null){$("grdSt").textContent=gotMotion?"計測中":"センサー待ち…";return}
+  if(fu===null){$("grdSt").textContent=gotMotion?"計測中":"センサー待ち…";$("grdSt").classList.remove("blink");document.querySelector("#grd .n").classList.remove("blink");return}
   $("grdSt").textContent=frozen?"加速・減速中は停止":"計測中";
   $("grdSt").classList.toggle("blink",!!frozen);
+  document.querySelector("#grd .n").classList.toggle("blink",!!frozen);
   if(zero===null){$("grdLab").textContent="未設定";$("grdM").textContent="";$("grdV").textContent="--";setC("#fff");return}
   let a=-wrap(Math.atan2(fz,fu)-zero);if(rev)a=-a;
   const p=Math.tan(a)*100,r=frozen?(shown===null?Math.round(p):shown):settle(p);
